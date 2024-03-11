@@ -3,7 +3,7 @@ from shiny.express import input, ui
 from shinywidgets import render_plotly
 import palmerpenguins  # This package provides the Palmer Penguins dataset
 import pandas
-from shiny import render
+from shiny import render, reactive
 import seaborn as sns
 
 # Use the built-in function to load the Palmer Penguins dataset
@@ -86,3 +86,15 @@ with ui.card(full_screen=True):
     def plotly_pie_s():
         pie_chart = px.pie(penguins_df, values="body_mass_g", names="species", title="Body mass from Species")
         return pie_chart
+# --------------------------------------------------------
+# Reactive calculations and effects
+# --------------------------------------------------------
+
+# Add a reactive calculation to filter the data
+# By decorating the function with @reactive, we can use the function to filter the data
+# The function will be called whenever an input functions used to generate that output changes.
+# Any output that depends on the reactive function (e.g., filtered_data()) will be updated when the data changes.
+
+@reactive.calc
+def filtered_data():
+    return penguins_df
