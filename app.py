@@ -9,6 +9,7 @@ import seaborn as sns
 # Use the built-in function to load the Palmer Penguins dataset
 penguins_df = palmerpenguins.load_penguins()
 
+
 ui.page_opts(title="Nolan's Penguin Data", fillable=True)
 
 #Shiny UI sidebar for user interaction
@@ -40,25 +41,24 @@ with ui.sidebar(open="open"):
 with ui.layout_columns():
     @render_plotly  
     def plot_plt():  
-        return px.histogram(penguins_df,
-            x="body_mass_g",
+        return px.histogram(filtered_data(), x="body_mass_g",
             title="Penguin Mass",
             labels={"body_mass_g": "Body Mass (g)", "count": "Count"})
         
     @render.plot  
     def plot_sns():  
-        return sns.histplot(penguins_df, x="species", kde=False)
+        return sns.histplot(filtered_data(), x="species", kde=False)
 
 # Show Data
 with ui.layout_columns():
 
     @render.data_frame
     def penguins_datatable():
-        return render.DataTable(penguins_df) 
+        return render.DataTable(filtered_data()) 
 
     @render.data_frame
     def penguins_grid():
-        return render.DataGrid(penguins_df)
+        return render.DataGrid(filtered_data())
 
 #Create Scatter plot
 with ui.card(full_screen=True):
@@ -68,7 +68,7 @@ with ui.card(full_screen=True):
     @render_plotly
     def plotly_scatterplot():
         # Create a Plotly scatterplot using Plotly Express
-        return px.scatter(penguins_df, x="flipper_length_mm", y="bill_length_mm", color="species", 
+        return px.scatter(filtered_data(), x="flipper_length_mm", y="bill_length_mm", color="species", 
                           facet_row="species", facet_col="sex", title="Penguin Scatterplot", labels={"flipper_length_mm": "Flipper Length (mm)", "bill_length_mm": "Bill Length (mm)"})
 
 
@@ -79,12 +79,12 @@ with ui.card(full_screen=True):
 
     @render_plotly
     def plotly_pie():
-        pie_chart = px.pie(penguins_df, values="body_mass_g", names="island", title="Body mass on Islands")
+        pie_chart = px.pie(filtered_data(), values="body_mass_g", names="island", title="Body mass on Islands")
         return pie_chart
 
     @render_plotly
     def plotly_pie_s():
-        pie_chart = px.pie(penguins_df, values="body_mass_g", names="species", title="Body mass from Species")
+        pie_chart = px.pie(filtered_data(), values="body_mass_g", names="species", title="Body mass from Species")
         return pie_chart
 # --------------------------------------------------------
 # Reactive calculations and effects
