@@ -1,11 +1,12 @@
 import plotly.express as px
 from shiny.express import input, ui
 from shinywidgets import render_plotly
-import palmerpenguins  # This package provides the Palmer Penguins dataset
 import pandas
 from shiny import render, reactive
 import seaborn as sns
 import matplotlib.pyplot as plt
+import palmerpenguins  # This package provides the Palmer Penguins dataset
+
 
 # Use the built-in function to load the Palmer Penguins dataset
 penguins_df = palmerpenguins.load_penguins()
@@ -39,9 +40,23 @@ with ui.sidebar(open="open"):
     # Add a hyperlink to the sidebar
     ui.a("GitHub", href="https://github.com/Crusoe22/cintel-02-data.git", target="_blank")
 
+# Show Data
+with ui.card(full_screen=False):
+
+    @render.data_frame
+    def penguins_datatable():
+        pen_dt = render.DataTable(filtered_data()) 
+        return pen_dt
+
+# Show Data
+with ui.card(full_screen=True):#with ui.card(full_screen=True):
+    @render.data_frame
+    def penguins_grid():
+        pen_grid = render.DataGrid(filtered_data())
+        return pen_grid
 
 # Plot Charts
-with ui.layout_columns():
+with ui.card(full_screen=True):
     @render_plotly  
     def plot_plt():  
         plot_px = px.histogram(filtered_data(),
@@ -66,27 +81,8 @@ with ui.layout_columns():
         plot_snshist.set_title("Seaborn Histogram of Body Measurements by Species")
         return plot_snshist
 
-# Horizontal rule
-ui.hr()
-
-# Show Data
-with ui.card(full_screen=True):
-
-    @render.data_frame
-    def penguins_datatable():
-        pen_dt = render.DataTable(filtered_data()) 
-        return pen_dt
-
-# Show Data
-with ui.card(full_screen=True):
-    @render.data_frame
-    def penguins_grid():
-        pen_grid = render.DataGrid(filtered_data())
-        return pen_grid
 
 
-# Horizontal rule
-ui.hr()
 
 #Create Scatter plot
 with ui.card(full_screen=True):
