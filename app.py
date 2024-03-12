@@ -8,6 +8,9 @@ import seaborn as sns
 
 # Use the built-in function to load the Palmer Penguins dataset
 penguins_df = palmerpenguins.load_penguins()
+penguins_df_r = penguins_df.rename(columns={"bill_depth_mm": "Bill Depth (mm)", "bill_length_mm": "Bill Length (mm)", 
+"flipper_length_mm": "Flipper Length (mm)", "body_mass_g": "Body Mass (g)", "species": "Species", "island": "Island", "sex": "Sex", "year": "Year"})
+
 
 
 ui.page_opts(title="Nolan's Penguin Data", fillable=True)
@@ -17,18 +20,17 @@ with ui.sidebar(open="open"):
     ui.h2("Sidebar")
     
     # Create a dropdown input to choose a column 
-    ui.input_selectize("selected_attribute", "Body Measurement in Millimeters", 
-                       ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]) 
+    ui.input_selectize("selected_attribute", "Body Measurement in Millimeters", choices=["Bill Length (mm)", "Bill Depth (mm)", "Flipper Length (mm)", "Body Mass (g)"]) 
     
     # Create a numeric input for the number of Plotly histogram bins
-    ui.input_numeric("plotly_bin_count", "Bin Count", 10)
+    ui.input_numeric("plotly_bin_count", "Plotly Bin Count", 10)
     
     # Create a slider input for the number of Seaborn bins
-    ui.input_slider("seaborn_bin_count", "Bin Count", 1, 100, 50)
+    ui.input_slider("seaborn_bin_count", "Seaborn Bin Count", 1, 100, 50)
 
     # Create a checkbox group input to filter the species
-    ui.input_checkbox_group("selected_species_lis", "Selected Species of Penguins", 
-                            ["Adelie", "Gentoo", "Chinstrap"], selected="", inline=False)
+    ui.input_checkbox_group("selected_species_list", "Selected Species of Penguins", 
+                            ["Adelie", "Gentoo", "Chinstrap"], selected="Adelie", inline=False)
 
     # Add a horizontal rule to the sidebar
     ui.hr()
@@ -41,13 +43,24 @@ with ui.sidebar(open="open"):
 with ui.layout_columns():
     @render_plotly  
     def plot_plt():  
-        return px.histogram(filtered_data(), x="body_mass_g",
-            title="Penguin Mass",
-            labels={"body_mass_g": "Body Mass (g)", "count": "Count"})
+        return px.histogram(filtered_data(),
+                            x=input.selected_attribute(),
+                            nbins=input.plotly_bin_count(),
+                            title="Penguin Body Mass",
+                           labels={"count": "Count"}
+                           )
         
     @render.plot  
     def plot_sns():  
-        return sns.histplot(filtered_data(), x="species", kde=False)
+        return sns.histplot(data=filtered_data(),
+                            x=input.selected_attribute(),
+                            bins=input.seaborn_bin_count(),
+                            multiple="dodge",
+                            hue="Species",
+                            kde=False)
+
+# Horizontal rule
+ui.hr()
 
 # Show Data
 with ui.layout_columns():
@@ -60,6 +73,9 @@ with ui.layout_columns():
     def penguins_grid():
         return render.DataGrid(filtered_data())
 
+# Horizontal rule
+ui.hr()
+
 #Create Scatter plot
 with ui.card(full_screen=True):
 
@@ -68,8 +84,8 @@ with ui.card(full_screen=True):
     @render_plotly
     def plotly_scatterplot():
         # Create a Plotly scatterplot using Plotly Express
-        return px.scatter(filtered_data(), x="flipper_length_mm", y="bill_length_mm", color="species", 
-                          facet_row="species", facet_col="sex", title="Penguin Scatterplot", labels={"flipper_length_mm": "Flipper Length (mm)", "bill_length_mm": "Bill Length (mm)"})
+        return px.scatter(filtered_data(), x="Flipper Length (mm)", y="Bill Length (mm)", color="Species", 
+                          facet_row="Species", facet_col="Sex", title="Penguin Scatterplot")
 
 
 # Pie Chart plot
@@ -79,12 +95,12 @@ with ui.card(full_screen=True):
 
     @render_plotly
     def plotly_pie():
-        pie_chart = px.pie(filtered_data(), values="body_mass_g", names="island", title="Body mass on Islands")
+        pie_chart = px.pie(filtered_data(), values="Body Mass (g)", names="Island", title="Body mass on Islands")
         return pie_chart
 
     @render_plotly
     def plotly_pie_s():
-        pie_chart = px.pie(filtered_data(), values="body_mass_g", names="species", title="Body mass from Species")
+        pie_chart = px.pie(filtered_data(), values="Body Mass (g)", names="Species", title="Body mass from Species")
         return pie_chart
 # --------------------------------------------------------
 # Reactive calculations and effects
@@ -97,4 +113,4 @@ with ui.card(full_screen=True):
 
 @reactive.calc
 def filtered_data():
-    return penguins_df
+    return penguins_df_r[penguins_df_r["Species"].isin(input.selected_species_list())]
