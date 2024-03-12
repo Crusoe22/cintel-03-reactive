@@ -4,7 +4,6 @@ from shinywidgets import render_plotly
 import pandas
 from shiny import render, reactive
 import seaborn as sns
-import matplotlib.pyplot as plt
 import palmerpenguins  # This package provides the Palmer Penguins dataset
 
 
@@ -62,7 +61,7 @@ with ui.card(full_screen=True):
         plot_px = px.histogram(filtered_data(),
                             x=input.selected_attribute(),
                             nbins=input.plotly_bin_count(),
-                            title="Plotly Penguin Histogram",
+                            title="Plotly Penguin Body Measurements Histogram",
                             color="Species",
                             labels={"count": "Count"}
                            )
