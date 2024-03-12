@@ -5,6 +5,7 @@ import palmerpenguins  # This package provides the Palmer Penguins dataset
 import pandas
 from shiny import render, reactive
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Use the built-in function to load the Palmer Penguins dataset
 penguins_df = palmerpenguins.load_penguins()
@@ -55,6 +56,7 @@ with ui.layout_columns():
         
     @render.plot  
     def plot_sns():  
+        
         plot_snshist = sns.histplot(data=filtered_data(),
                             x=input.selected_attribute(),
                             bins=input.seaborn_bin_count(),
@@ -68,15 +70,20 @@ with ui.layout_columns():
 ui.hr()
 
 # Show Data
-with ui.layout_columns():
+with ui.card(full_screen=True):
 
     @render.data_frame
     def penguins_datatable():
-        return render.DataTable(filtered_data()) 
+        pen_dt = render.DataTable(filtered_data()) 
+        return pen_dt
 
+# Show Data
+with ui.card(full_screen=True):
     @render.data_frame
     def penguins_grid():
-        return render.DataGrid(filtered_data())
+        pen_grid = render.DataGrid(filtered_data())
+        return pen_grid
+
 
 # Horizontal rule
 ui.hr()
@@ -107,15 +114,8 @@ with ui.card(full_screen=True):
     def plotly_pie_s():
         pie_chart = px.pie(filtered_data(), values="Body Mass (g)", names="Species", title="Body mass from Species")
         return pie_chart
-# --------------------------------------------------------
-# Reactive calculations and effects
-# --------------------------------------------------------
 
 # Add a reactive calculation to filter the data
-# By decorating the function with @reactive, we can use the function to filter the data
-# The function will be called whenever an input functions used to generate that output changes.
-# Any output that depends on the reactive function (e.g., filtered_data()) will be updated when the data changes.
-
 @reactive.calc
 def filtered_data():
     return penguins_df_r[penguins_df_r["Species"].isin(input.selected_species_list())]
