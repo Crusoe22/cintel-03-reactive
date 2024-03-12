@@ -43,21 +43,26 @@ with ui.sidebar(open="open"):
 with ui.layout_columns():
     @render_plotly  
     def plot_plt():  
-        return px.histogram(filtered_data(),
+        plot_px = px.histogram(filtered_data(),
                             x=input.selected_attribute(),
                             nbins=input.plotly_bin_count(),
-                            title="Penguin Body Mass",
-                           labels={"count": "Count"}
+                            title="Plotly Penguin Histogram",
+                            color="Species",
+                            labels={"count": "Count"}
                            )
+        plot_px.update_layout(yaxis_title="Count")
+        return plot_px
         
     @render.plot  
     def plot_sns():  
-        return sns.histplot(data=filtered_data(),
+        plot_snshist = sns.histplot(data=filtered_data(),
                             x=input.selected_attribute(),
                             bins=input.seaborn_bin_count(),
-                            multiple="dodge",
+                            element="step",
                             hue="Species",
                             kde=False)
+        plot_snshist.set_title("Seaborn Histogram of Body Measurements by Species")
+        return plot_snshist
 
 # Horizontal rule
 ui.hr()
